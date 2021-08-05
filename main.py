@@ -1,25 +1,54 @@
+import chardet
 import pandas as pd
 import seaborn as sns
 import numpy as np
 import matplotlib.pyplot as plt
 
-ativo = pd.read_csv('dados/Efetivo_ativo.csv',sep=';',index_col=False)
+with open('../dados/Efetivo_ativo.csv', 'rb') as f:
+    result = chardet.detect(f.read())  # or readline if the file is large
+ativo = pd.read_csv('../dados/Efetivo_ativo.csv', encoding=result['encoding'],sep=';',index_col=False)
 ativo['ValorBruto'] = ativo['ValorBruto'].str.replace(',', '.').astype(float)
 
-
-inativo = pd.read_csv('dados/Efetivo_inativo.csv',sep=';',index_col=False)
+with open('../dados/Efetivo_inativo.csv', 'rb') as f:
+    result = chardet.detect(f.read())  # or readline if the file is large
+inativo = pd.read_csv('../dados/Efetivo_inativo.csv',encoding=result['encoding'],sep=';',index_col=False)
 inativo['ValorBruto'] = inativo['ValorBruto'].str.replace(',', '.').astype(float)
 
-comissionado_ativo = pd.read_csv('dados/efetivo_comissionado_ativo.csv',sep=';',index_col=False)
+with open('../dados/efetivo_comissionado_ativo.csv', 'rb') as f:
+    result = chardet.detect(f.read())  # or readline if the file is large
+comissionado_ativo = pd.read_csv('../dados/efetivo_comissionado_ativo.csv',encoding=result['encoding'],sep=';',index_col=False)
 comissionado_ativo['ValorBruto'] = comissionado_ativo ['ValorBruto'].str.replace(',', '.').astype(float)
 
-pensionista_especial = pd.read_csv('dados/Pensionista_especial.csv',sep=';',index_col=False)
+with open('../dados/Pensionista_especial.csv', 'rb') as f:
+    result = chardet.detect(f.read())  # or readline if the file is large
+pensionista_especial = pd.read_csv('../dados/Pensionista_especial.csv',encoding=result['encoding'],sep=';',index_col=False)
 pensionista_especial['ValorBruto'] = pensionista_especial['ValorBruto'].str.replace(',', '.').astype(float)
 
-
-pensionista_iprev = pd.read_csv('dados/Pensionista_iprev.csv',sep=';',index_col=False)
+with open('../dados/Pensionista_iprev.csv', 'rb') as f:
+    result = chardet.detect(f.read())  # or readline if the file is large
+pensionista_iprev = pd.read_csv('../dados/Pensionista_iprev.csv',encoding=result['encoding'],sep=';',index_col=False)
 pensionista_iprev['ValorBruto'] = pensionista_iprev['ValorBruto'].str.replace(',', '.').astype(float)
 
+tabela = pensionista_iprev.isnull().sum()
+
+from unidecode import unidecode
+# cargos ativos civil 691, ativos militares 52
+
+
+def duplicidade(dados):
+    y = 0
+    for nome in dados['Cargo']:
+        dados.loc[y,'Cargo'] = unidecode(nome)
+        
+        y+= 1
+    print('termino')
+    return dados
+
+ativo = duplicidade(ativo)
+inativo = duplicidade(inativo)
+comissionado_ativo = duplicidade(comissionado_ativo)
+# pensionista_especial = duplicidade(pensionista_especial)
+pensionista_iprev = duplicidade(pensionista_iprev)
 
 # Calculos de arrecadação
 
@@ -217,12 +246,40 @@ fig.tight_layout()
 plt.show()
 
 # Despesas por cargo
-
+''' Verificação de todos os cargos duplicidade'''
 cargos_inativos = inativo['Cargo'].value_counts()
 cargos_pensionista = pensionista_especial['OrgaoOrigem'].value_counts()
 cargos_pensionista_iprev = pensionista_iprev['Cargo'].value_counts()
 
+#------------------------------------------
+
+cargos_ativos_c = ativo_civil['Cargo'].value_counts()
+
+cargos_comissionado_c = comissionado_ativo_civil['Cargo'].value_counts()
+
+cargos_inativos_c = inativo_civil['Cargo'].value_counts()
+
+cargos_ativos_m = ativo_militar['Cargo'].value_counts()
+
+cargos_inativos_m = inativo_militar['Cargo'].value_counts()
+
+cargos_comissionado_m = comissionado_ativo_militar['Cargo'].value_counts()
+
+
+def comparar(a,b):
+    for s in a.index:
+        for d in b.index:
+            if s != d:
+                print(s)
+
+comparar(cargos_inativos,cargos_inativos)
+
+#232
+
+
+
 cargos_despesas = pd.DataFrame(cargos_inativos.index,columns=['tipo'])
+cargos_despesas['quantidade'] = cargos_inativos.values
 
 y = 0
 for nome in cargos_despesas.tipo:
@@ -238,18 +295,22 @@ for nome in cargos_despesas.tipo:
 
 cargos_despesas.loc[232,'tipo'] = 'PENSOES ESPECIAIS'
 cargos_despesas.loc[232,'despesas'] = sum(pensionista_especial['ValorBruto'])
+cargos_despesas.loc[232,'quantidade'] = len(pensionista_especial['ValorBruto'])
 #---------------------------------------------------
 cargos_despesas.loc[233,'tipo'] = 'PENSIONISTA DO IPREV'
 cargos_despesas.loc[233,'despesas'] = sum(pensionista_iprev['ValorBruto'])
+cargos_despesas.loc[233,'quantidade'] = len(pensionista_iprev['ValorBruto'])
+
 #----------------------------------------------------
 
-    
+
 # Arrecadação
 
 # 1 Arrecadação civil cargos ativados
-cargos_ativos_c = ativo_civil['Cargo'].value_counts()
+
 
 cargos_ativos_civil = pd.DataFrame(cargos_ativos_c.index,columns=['tipo'])
+
 
 y=0
 for nome in cargos_ativos_civil.tipo:
@@ -266,7 +327,7 @@ for nome in cargos_ativos_civil.tipo:
 
 # 2 Arrecadação Cargos Comissionados civil ativados
 
-cargos_comissionado_c = comissionado_ativo_civil['Cargo'].value_counts()
+
 
 cargos_comissionado_civil = pd.DataFrame(cargos_comissionado_c.index,columns=['tipo'])
 
@@ -283,7 +344,7 @@ for nome in cargos_comissionado_civil.tipo:
 
 
 # 3 Arrecadação civil cargos inativos
-cargos_inativos_c = inativo_civil['Cargo'].value_counts()
+
 
 cargos_inativos_civil = pd.DataFrame(cargos_inativos_c.index,columns=['tipo'])
 
@@ -312,8 +373,6 @@ cargos_pensionista_iprev.loc[0,'arrecadacao'] = soma
 
 # 6 Arrecadação militares ativo
 
-cargos_ativos_m = ativo_militar['Cargo'].value_counts()
-
 cargos_ativos_militar = pd.DataFrame(cargos_ativos_m.index,columns=['tipo'])
 
 y=0
@@ -331,7 +390,7 @@ for nome in cargos_ativos_militar.tipo:
 
 # 7 Arrecadação  Militares inativos 
 
-cargos_inativos_m = inativo_militar['Cargo'].value_counts()
+
 
 cargos_inativos_militar = pd.DataFrame(cargos_inativos_m.index,columns=['tipo'])
 
@@ -350,7 +409,7 @@ for nome in cargos_inativos_militar.tipo:
 
 # 8 Arrecadação  Militares comissionados
 
-cargos_comissionado_m = comissionado_ativo_militar['Cargo'].value_counts()
+
 
 cargos_comissionado_militar = pd.DataFrame(cargos_comissionado_m.index,columns=['tipo'])
 
@@ -380,168 +439,201 @@ cargos_arrecadacao = pd.concat([cargos_ativos_civil, cargos_comissionado_civil,
 
 cargos_arrecadacao = cargos_arrecadacao.reset_index(drop=True)
 
+filtro = cargos_arrecadacao['tipo'].value_counts()
+arrecadar_filtro= pd.DataFrame(filtro.index,columns=['tipo'])
+y = 0
+for fil in filtro.index:
+    soma = 0
+    for i in range(len(cargos_arrecadacao)):
+        if fil == cargos_arrecadacao['tipo'].values[i]:
+            soma = soma + cargos_arrecadacao['arrecadacao'].values[i]
+    arrecadar_filtro.loc[y,'arrecadacao'] = soma
+    y+= 1
+    
+
+
 cargos_total= pd.DataFrame(columns=['tipo','arrecadacao','despesas'])
 count = 0
 y = 0
-for nome in cargos_arrecadacao.tipo:
-    count += 1
+for nome in arrecadar_filtro.tipo:
+    
     nome_txt = "'"+nome+"'"
     texto = f'tipo == {nome_txt}'
     despesa = cargos_despesas.query(texto)
-    if len(despesa):
+    if len(despesa) > 0:
         print(despesa['despesas'])
         cargos_total.loc[y,'tipo'] = nome
-        cargos_total.loc[y,'arrecadacao'] = float(cargos_arrecadacao['arrecadacao'][count])
+        cargos_total.loc[y,'arrecadacao'] = float(arrecadar_filtro['arrecadacao'][count])
         cargos_total.loc[y,'despesas'] = float(despesa['despesas'].values)
-        cargos_total.loc[y,'diferenca'] = float(cargos_arrecadacao['arrecadacao'][count]) - float(despesa['despesas'].values)
+        cargos_total.loc[y,'diferenca'] = float(arrecadar_filtro['arrecadacao'][count]) - float(despesa['despesas'].values)
+        count += 1
         y += 1
 
     
+cargos_total_b= pd.DataFrame(columns=['tipo','arrecadacao','despesas'])
 y = 0
-for ca in range(len(cargos_arrecadacao)):
+s = 0
+for ca in range(len(arrecadar_filtro)):
     ficha = True
+    s = 0
     for cd in range(len(cargos_despesas)):
-        if cargos_arrecadacao['tipo'][ca] ==  cargos_despesas['tipo'][cd]:
+        if arrecadar_filtro['tipo'][ca] ==  cargos_despesas['tipo'][cd]:
             ficha = False
-            cargos_total.loc[y,'tipo'] = cargos_arrecadacao['tipo'][ca]
-            cargos_total.loc[y,'arrecadacao'] = float(cargos_arrecadacao['arrecadacao'][ca])
-            cargos_total.loc[y,'despesas'] = float(cargos_despesas['despesas'][cd])
-            cargos_total.loc[y,'diferenca'] = float(cargos_arrecadacao['arrecadacao'][ca] - cargos_despesas['despesas'][cd])
+            s+= 1
+            cargos_total_b.loc[y,'tipo'] =arrecadar_filtro['tipo'][ca]
+            cargos_total_b.loc[y,'arrecadacao'] = float(arrecadar_filtro['arrecadacao'][ca])
+            cargos_total_b.loc[y,'despesas'] = float(cargos_despesas['despesas'][cd])
+            cargos_total_b.loc[y,'diferenca'] = float(arrecadar_filtro['arrecadacao'][ca] - cargos_despesas['despesas'][cd])
+            cargos_total_b.loc[y,'quantidade'] = float(cargos_despesas['quantidade'][cd])
+            cargos_total_b.loc[y,'valorMedio'] = float(cargos_despesas['despesas'][cd])/float(cargos_despesas['quantidade'][cd])
             y += 1
-    # if ficha:
+        if s>1:
+            print(s,'Cargo reptido: ',arrecadar_filtro['tipo'][ca])
+    if ficha:
+        print(ca,'Não tem cargo nos inativos: ',arrecadar_filtro['tipo'][ca])
     #     cargos_total.loc[y,'tipo'] = cargos_arrecadacao['tipo'][ca]
     #     cargos_total.loc[y,'arrecadacao'] = float(cargos_arrecadacao['arrecadacao'][ca])
     #     cargos_total.loc[y,'despesas'] = 0
     #     cargos_total.loc[y,'diferenca'] = float(cargos_arrecadacao['arrecadacao'][ca])
     #     y += 1
         
-inativo_civil = (inativo[inativo.OrgaoOrigem != 'POLICIA MILITAR']) 
-cargos_p = cargos_arrecadacao['tipo']
+# inativo_civil = (inativo[inativo.OrgaoOrigem != 'POLICIA MILITAR']) 
+# cargos_p = cargos_arrecadacao['tipo']
 import plotly.graph_objects as go
+import plotly.express as px
 animals=['giraffes', 'orangutans', 'monkeys']
-
+cargos_total_b = cargos_total_b.sort_values(by=['diferenca'])
+grafico=[]
+# for rs in range(0,20):
+# grafico.append(go.Bar(name='SF Zoo', x=cargos_total_b['tipo'][0:20].values, y=[20, 14, 23]))
+periodo = 10
 fig = go.Figure(data=[
-    go.Bar(name='SF Zoo', x=animals, y=[20, 14, 23]),
-    go.Bar(name='LA Zoo', x=animals, y=[12, 18, 29])
+    go.Bar(name='Arrecadação', x=cargos_total_b['tipo'][0:periodo].values, y=cargos_total_b['arrecadacao'][0:periodo].values),
+    go.Bar(name='Despesas', 
+           x=cargos_total_b['tipo'][0:periodo].values, 
+           y=cargos_total_b['despesas'][0:periodo].values,
+           marker_color='crimson'),
+    go.Bar(name='Défice', 
+           x=cargos_total_b['tipo'][0:periodo].values, 
+           y=cargos_total_b['diferenca'][0:periodo].values,marker_color='red')
 ])
-# Change the bar mode
-fig.update_layout(barmode='group')
-fig.show()
+
+# fig.update_traces(texttemplate='%{text:.2s}', textposition='outside',marker_color='rgb(158,202,225)', marker_line_color='rgb(8,48,107)',marker_line_width=1.5, opacity=0.6)
+                  
+fig.update_layout(
+    title_text='OS 10 MAIORES CARGOS DEFICITÁRIOS',
+    yaxis=dict(
+        title='R$(milhões)',
+        titlefont_size=13,
+        tickfont_size=12,
+    ),
+    legend=dict(
+        x=0.7,
+        y=1.0,
+        bgcolor='rgba(255, 255, 255, 0)',
+        bordercolor='rgba(255, 255, 255, 0)'
+    ),
+    barmode='group',
+    font=dict(
+        size=10,
+        color="RebeccaPurple"
+    ),
+)
+fig.write_html("menores.html")
+
+cargos_total_b = cargos_total_b.sort_values(by=['diferenca'],ascending=False)
+
+periodo = 10
+fig = go.Figure(data=[
+    go.Bar(name='Arrecadação', x=cargos_total_b['tipo'][0:periodo].values, y=cargos_total_b['arrecadacao'][0:periodo].values),
+    go.Bar(name='Despesas', 
+           x=cargos_total_b['tipo'][0:periodo].values, 
+           y=cargos_total_b['despesas'][0:periodo].values,
+           marker_color='crimson'),
+    go.Bar(name='Superávite', 
+           x=cargos_total_b['tipo'][0:periodo].values, 
+           y=cargos_total_b['diferenca'][0:periodo].values,marker_color='cyan')
+])
+
+# fig.update_traces(texttemplate='%{text:.2s}', textposition='outside',marker_color='rgb(158,202,225)', marker_line_color='rgb(8,48,107)',marker_line_width=1.5, opacity=0.6)
+                  
+fig.update_layout(
+    title_text='OS 10 MAIORES CARGOS SUPERAVITÁRIOS',
+    yaxis=dict(
+        title='R$(milhões)',
+        titlefont_size=13,
+        tickfont_size=12,
+    ),
+    legend=dict(
+        x=0.7,
+        y=1.0,
+        bgcolor='rgba(255, 255, 255, 0)',
+        bordercolor='rgba(255, 255, 255, 0)'
+    ),
+    barmode='group',
+    font=dict(
+        size=10,
+        color="RebeccaPurple"
+    ),
+
+)
+fig.write_html("maiores.html")
 
 
-'''
-inativo = 
-
-comissionado_ativo = 
-
-pensionista_especial = 
-
-pensionista_iprev = 
-
-
-
-
-print('-------------------------------------------------------------')
-print('Valor total gasto com ativos: ', sum(ativo['ValorBruto']))
-
-print('Valor total gasto com inativos: ', sum(inativo['ValorBruto']))
-
-
-cargos_ativo_qtd = ativo['Cargo'].value_counts()
-
-cargos_ativo_qtd = cargos_ativo_qtd.to_frame(name='Quantidade')
-cargos_ativo_qtd['Cargos'] = cargos_ativo_qtd.index
-cargos_ativo_qtd = cargos_ativo_qtd.reset_index(drop = True)
-posicao = [x for x in range(1,len(cargos_ativo_qtd)+1)]
-cargos_ativo_qtd['RANKING'] = posicao
-cargos_ativo_qtd = cargos_ativo_qtd[['RANKING','Cargos','Quantidade']]
-
-cargos_inativo_qtd = inativo['Cargo'].value_counts()
-
-cargos_inativo_qtd = cargos_inativo_qtd.to_frame(name='Quantidade')
-cargos_inativo_qtd['Cargos'] = cargos_inativo_qtd.index
-cargos_inativo_qtd = cargos_inativo_qtd.reset_index(drop = True)
-posicao = [x for x in range(1,len(cargos_inativo_qtd)+1)]
-cargos_inativo_qtd['RANKING'] = posicao
-cargos_inativo_qtd = cargos_inativo_qtd[['RANKING','Cargos','Quantidade']]
-
-
-# Numero de Órgãos ativos
-
-Orgaos_ativo_qtd = ativo['OrgaoOrigem'].value_counts()
-Orgaos_ativo_qtd = Orgaos_ativo_qtd.to_frame(name='Quantidade')
-Orgaos_ativo_qtd['Orgaos'] = Orgaos_ativo_qtd.index
-Orgaos_ativo_qtd = Orgaos_ativo_qtd.reset_index(drop = True)
-posicao = [x for x in range(1,len(Orgaos_ativo_qtd)+1)]
-Orgaos_ativo_qtd['RANKING'] = posicao
-Orgaos_ativo_qtd = Orgaos_ativo_qtd[['RANKING','Orgaos','Quantidade']]
-
-# Numero de Órgãos inativos
-
-Orgaos_inativo_qtd = inativo['OrgaoOrigem'].value_counts()
-Orgaos_inativo_qtd = Orgaos_inativo_qtd.to_frame(name='Quantidade')
-Orgaos_inativo_qtd['Orgaos'] = Orgaos_inativo_qtd.index
-Orgaos_inativo_qtd = Orgaos_inativo_qtd.reset_index(drop = True)
-posicao = [x for x in range(1,len(Orgaos_inativo_qtd)+1)]
-Orgaos_inativo_qtd['RANKING'] = posicao
-Orgaos_inativo_qtd = Orgaos_inativo_qtd[['RANKING','Orgaos','Quantidade']]
-
-
-# Fazer a soma por grupos
-ativo_valor = ativo[['OrgaoOrigem','ValorBruto']]
-
-salario_orgao_ativo = ativo_valor.groupby(['OrgaoOrigem']).sum()
-# salario_orgao_ativo = Orgaos_inativo_qtd.to_frame(name='Quantidade')
-salario_orgao_ativo['Orgaos'] = salario_orgao_ativo.index
-salario_orgao_ativo = salario_orgao_ativo.sort_values(['ValorBruto'])
-salario_orgao_ativo= salario_orgao_ativo.reset_index(drop = True)
-
-inativo_valor = inativo[['OrgaoOrigem','ValorBruto']]
-
-salario_orgao_inativo = inativo_valor.groupby(['OrgaoOrigem']).sum()
-# salario_orgao_ativo = Orgaos_inativo_qtd.to_frame(name='Quantidade')
-salario_orgao_inativo['Orgaos'] = salario_orgao_inativo.index
-salario_orgao_inativo = salario_orgao_inativo.sort_values(['ValorBruto'])
-salario_orgao_inativo= salario_orgao_inativo.reset_index(drop = True)
-
-
-# import dash
-# import dash_core_components as dcc
-# import dash_html_components as html
-# import plotly.express as px
-# import pandas as pd
-
-# external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-
-# app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+html= cargos_total_b.to_html()
+arq = open("tabela.html","w")
+arq.write(html)
 
 
 
-# fig = px.bar(ativo, x="OrgaoOrigem", y="ValorBruto", color="Cargo")
+print(' ')
+print('Criando tabela em markdown')
+name_colunas = '|'
+rows='|'
+for colunas in cargos_total_b:
+    
+    name_colunas += f'{colunas}|'
+    rows+='--------|'
+    
+print(name_colunas)
+print(rows)
 
-# fig_orgaos = px.bar(Orgaos_ativo_qtd , x="Quantidade", y="Orgaos")
 
-# app.layout = html.Div(children=[
-#     html.H1(children='Divisão por Orgão'),
 
-#     html.Div(children='''
-#         Agrupamento por Orgão de Origem.
-#     '''),
 
-#     dcc.Graph(
-#         id='example-graph',
-#         figure=fig
-#     ),
-#     html.Div(children='''
-#         Agrupamento por Orgão de Origem.
-#     '''),
 
-#     dcc.Graph(
-#         id='example-graph2',
-#         figure=fig_orgaos
-#     )
-# ])
 
-# if __name__ == '__main__':
-#     app.run_server(debug=True)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
