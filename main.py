@@ -584,11 +584,28 @@ html= cargos_total_b.to_html()
 arq = open("tabela.html","w")
 arq.write(html)
 
+def formatar(numeros):
+    t=0
+    numeros = str(round(numeros,2))
+    # numeros = numeros.split()
+    i = len(numeros) -1
+    palavra = '$'
+    for p in range(0,len(numeros)):
+        if i== 6 or i == 9:
+            palavra += numeros[p]+'.'
+        else:
+            palavra += numeros[p]
+        # print(i,p,t,palavra)
+        t+=1
+        i-=1
+
+    # print(palavra,'-',numeros,len(numeros))
+    return palavra
 
 
 print(' ')
 print('Criando tabela em markdown')
-name_colunas = '|'
+name_colunas = '|Posição|'
 rows='|'
 dados_colunas =''
 dados_linhas= '|'
@@ -596,19 +613,27 @@ for colunas in cargos_total_b:
     name_colunas += f'{colunas}|'
     rows+='--------|'
 print(name_colunas)
+print(rows)
+i=0
+h=0
 for dados in cargos_total_b.values:
     dados_linhas= '|'
+    i=0
+    h+=1
     for s in dados:
-        # print(s,type(s))
-        s = str(round(float(s),3)) if isinstance(s,float) else s
-        # print(s)
+        if i == 0:
+            dados_linhas =f'|{h}|'
+        if i == 4:
+            s = int(s)
+        else:
+            s = formatar(s) if isinstance(s,float) else s
         dados_linhas += f'{s}|'
-    dados_colunas += dados_linhas
+        i+= 1
+    # dados_colunas += dados_linhas
     print(dados_linhas)
+    
+
         
-# print(name_colunas)
-# print(rows)
-# print(dados_colunas)
 
 
 
