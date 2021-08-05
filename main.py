@@ -470,7 +470,7 @@ for nome in arrecadar_filtro.tipo:
         y += 1
 
     
-cargos_total_b= pd.DataFrame(columns=['tipo','arrecadacao','despesas'])
+cargos_total_b= pd.DataFrame(columns=['Cargos','arrecadação','Despesas'])
 y = 0
 s = 0
 for ca in range(len(arrecadar_filtro)):
@@ -480,12 +480,12 @@ for ca in range(len(arrecadar_filtro)):
         if arrecadar_filtro['tipo'][ca] ==  cargos_despesas['tipo'][cd]:
             ficha = False
             s+= 1
-            cargos_total_b.loc[y,'tipo'] =arrecadar_filtro['tipo'][ca]
-            cargos_total_b.loc[y,'arrecadacao'] = float(arrecadar_filtro['arrecadacao'][ca])
-            cargos_total_b.loc[y,'despesas'] = float(cargos_despesas['despesas'][cd])
-            cargos_total_b.loc[y,'diferenca'] = float(arrecadar_filtro['arrecadacao'][ca] - cargos_despesas['despesas'][cd])
-            cargos_total_b.loc[y,'quantidade'] = float(cargos_despesas['quantidade'][cd])
-            cargos_total_b.loc[y,'valorMedio'] = float(cargos_despesas['despesas'][cd])/float(cargos_despesas['quantidade'][cd])
+            cargos_total_b.loc[y,'Cargos'] =arrecadar_filtro['tipo'][ca]
+            cargos_total_b.loc[y,'Arrecadação'] = float(arrecadar_filtro['arrecadacao'][ca])
+            cargos_total_b.loc[y,'Despesas'] = float(cargos_despesas['despesas'][cd])
+            cargos_total_b.loc[y,'Diferença'] = float(arrecadar_filtro['arrecadacao'][ca] - cargos_despesas['despesas'][cd])
+            cargos_total_b.loc[y,'Quantidade'] = float(cargos_despesas['quantidade'][cd])
+            cargos_total_b.loc[y,'Aposentadoria Media'] = float(cargos_despesas['despesas'][cd])/float(cargos_despesas['quantidade'][cd])
             y += 1
         if s>1:
             print(s,'Cargo reptido: ',arrecadar_filtro['tipo'][ca])
@@ -501,21 +501,21 @@ for ca in range(len(arrecadar_filtro)):
 # cargos_p = cargos_arrecadacao['tipo']
 import plotly.graph_objects as go
 import plotly.express as px
-animals=['giraffes', 'orangutans', 'monkeys']
-cargos_total_b = cargos_total_b.sort_values(by=['diferenca'])
+
+cargos_total_b = cargos_total_b.sort_values(by=['Diferença'])
 grafico=[]
 # for rs in range(0,20):
 # grafico.append(go.Bar(name='SF Zoo', x=cargos_total_b['tipo'][0:20].values, y=[20, 14, 23]))
 periodo = 10
 fig = go.Figure(data=[
-    go.Bar(name='Arrecadação', x=cargos_total_b['tipo'][0:periodo].values, y=cargos_total_b['arrecadacao'][0:periodo].values),
+    go.Bar(name='Arrecadação', x=cargos_total_b['Cargos'][0:periodo].values, y=cargos_total_b['Arrecadação'][0:periodo].values),
     go.Bar(name='Despesas', 
-           x=cargos_total_b['tipo'][0:periodo].values, 
-           y=cargos_total_b['despesas'][0:periodo].values,
+           x=cargos_total_b['Cargos'][0:periodo].values, 
+           y=cargos_total_b['Despesas'][0:periodo].values,
            marker_color='crimson'),
     go.Bar(name='Défice', 
-           x=cargos_total_b['tipo'][0:periodo].values, 
-           y=cargos_total_b['diferenca'][0:periodo].values,marker_color='red')
+           x=cargos_total_b['Cargos'][0:periodo].values, 
+           y=cargos_total_b['Diferença'][0:periodo].values,marker_color='red')
 ])
 
 # fig.update_traces(texttemplate='%{text:.2s}', textposition='outside',marker_color='rgb(158,202,225)', marker_line_color='rgb(8,48,107)',marker_line_width=1.5, opacity=0.6)
@@ -541,18 +541,18 @@ fig.update_layout(
 )
 fig.write_html("menores.html")
 
-cargos_total_b = cargos_total_b.sort_values(by=['diferenca'],ascending=False)
+cargos_total_b = cargos_total_b.sort_values(by=['Diferença'],ascending=False)
 
 periodo = 10
 fig = go.Figure(data=[
-    go.Bar(name='Arrecadação', x=cargos_total_b['tipo'][0:periodo].values, y=cargos_total_b['arrecadacao'][0:periodo].values),
+    go.Bar(name='Arrecadação', x=cargos_total_b['Cargos'][0:periodo].values, y=cargos_total_b['Arrecadação'][0:periodo].values),
     go.Bar(name='Despesas', 
-           x=cargos_total_b['tipo'][0:periodo].values, 
-           y=cargos_total_b['despesas'][0:periodo].values,
+           x=cargos_total_b['Cargos'][0:periodo].values, 
+           y=cargos_total_b['Despesas'][0:periodo].values,
            marker_color='crimson'),
     go.Bar(name='Superávite', 
-           x=cargos_total_b['tipo'][0:periodo].values, 
-           y=cargos_total_b['diferenca'][0:periodo].values,marker_color='cyan')
+           x=cargos_total_b['Cargos'][0:periodo].values, 
+           y=cargos_total_b['Diferença'][0:periodo].values,marker_color='cyan')
 ])
 
 # fig.update_traces(texttemplate='%{text:.2s}', textposition='outside',marker_color='rgb(158,202,225)', marker_line_color='rgb(8,48,107)',marker_line_width=1.5, opacity=0.6)
@@ -590,13 +590,24 @@ print(' ')
 print('Criando tabela em markdown')
 name_colunas = '|'
 rows='|'
+dados_colunas =''
+dados_linhas= '|'
 for colunas in cargos_total_b:
-    
     name_colunas += f'{colunas}|'
     rows+='--------|'
-    
+for dados in cargos_total_b.values:
+    dados_linhas= '|'
+    for s in dados:
+        print(s,type(s))
+        s = str(round(float(s),3)) if isinstance(s,float) else s
+        print(s)
+        dados_linhas += f'{s}|'
+    dados_colunas += dados_linhas
+        
 print(name_colunas)
 print(rows)
+print(dados_colunas)
+
 
 
 
