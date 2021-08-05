@@ -18,6 +18,7 @@ De acordo, com a LEI COMPLEMENTAR Nº 662, DE 11 DE DEZEMBRO DE 2015
 
 ## Tabela de informações por Cargo
 |Cargo|arrecadação|Despesas|Diferença|Qtd de inativos|Valor Médio de Aposentadoria|
+|--------|--------|--------|--------|--------|--------|
 |POLICIAL PENAL|10740629.357|1766526.68|8974102.677|163.0|10837.587|
 |ASSISTENTE DE EDUCACAO|3013849.266|348762.38|2665086.886|100.0|3487.624|
 |ASSISTENTE TECNICO PEDAGOGICO|4214260.002|1745866.86|2468393.142|367.0|4757.13|
