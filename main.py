@@ -595,18 +595,20 @@ dados_linhas= '|'
 for colunas in cargos_total_b:
     name_colunas += f'{colunas}|'
     rows+='--------|'
+print(name_colunas)
 for dados in cargos_total_b.values:
     dados_linhas= '|'
     for s in dados:
-        print(s,type(s))
+        # print(s,type(s))
         s = str(round(float(s),3)) if isinstance(s,float) else s
-        print(s)
+        # print(s)
         dados_linhas += f'{s}|'
     dados_colunas += dados_linhas
+    print(dados_linhas)
         
-print(name_colunas)
-print(rows)
-print(dados_colunas)
+# print(name_colunas)
+# print(rows)
+# print(dados_colunas)
 
 
 
