@@ -18,7 +18,7 @@ De acordo, com a LEI COMPLEMENTAR Nº 662, DE 11 DE DEZEMBRO DE 2015
 
 ## Tabela de informações por Cargo
 |Posição|Cargo|arrecadação|Despesas|Déficit/Superávit|Qtd de inativos|Valor Médio de Aposentadoria|
-|--------|--------|--------|--------|--------|--------|--------|
+|--------|--------|--------|--------|--------|--------|--------|-------|
 |1|POLICIAL PENAL|$10.740.629.36|$1.766.526.68|$8.974.102.68|163|$10.837.59|
 |2|ASSISTENTE DE EDUCACAO|$3.013.849.27|$348.762.38|$2.665.086.89|100|$3.487.62|
 |3|ASSISTENTE TECNICO PEDAGOGICO|$421.4260.0|$1.745.866.86|$2.468.393.14|367|$4.757.13|
